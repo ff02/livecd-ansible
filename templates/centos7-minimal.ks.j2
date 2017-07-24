@@ -1,0 +1,77 @@
+lang {{ lang }}
+keyboard {{ keyboard }}
+timezone {{ timezone }}
+auth --useshadow --enablemd5
+selinux --disabled
+firewall --disabled
+rootpw {{ root_password }}
+
+part / --size {{ partition_size }} --fstype ext4
+
+network --device eth0 --bootproto dhcp
+services --enabled=network
+
+{% for repo in repos_list %}repo --name={{ repo.name }} --baseurl={{ repo.baseurl }}
+{% endfor %}
+
+%packages --excludedocs --nocore
+-aic94xx-firmware*
+-alsa-*
+# -biosdevname
+-btrfs-progs*
+-dracut-network
+-ivtv*
+-iwl*firmware
+-wpa_supplicant*
+-libertas*
+-kexec-tools
+-plymouth*
+-postfix
+-*fonts
+-selinux*
+-*firewall*
+
+-librados
+-dracut-network
+-NetworkManager*
+
+yum
+kernel
+passwd
+# chkconfig
+rootfiles
+dhclient
+which
+sudo
+tcpdump
+
+# system-config-firewall-base
+
+# livecd bits to set up the livecd
+device-mapper-multipath
+
+%end
+
+%post --nochroot
+
+# Fix Issue with ansible chroot transport crashing when PATH variable is not defined
+export PATH=$PATH:/usr/local/sbin:/sbin:/bin:/usr/sbin:/usr/bin:/root/bin
+
+# Fix issue with resolving not working for chroot
+cp /etc/resolv.conf $INSTALL_ROOT/etc/resolv.conf
+
+# Generate inventory file for ansible
+cat > {{ work_dir }}/auto_gen_ansible_hosts-{{ config_name }} << EOF_ansible_hosts
+[post]
+$INSTALL_ROOT
+
+[post-nochroot]
+127.0.0.1 live_root=$LIVE_ROOT
+127.0.0.1 install_root=$INSTALL_ROOT
+EOF_ansible_hosts
+
+# Perform postinstallation with ansible
+/usr/bin/ansible-playbook -i {{ work_dir }}/auto_gen_ansible_hosts-{{ config_name }} {{ work_dir }}/{{ config_name }}.yml
+
+%end
+

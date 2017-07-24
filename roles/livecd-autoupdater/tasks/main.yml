@@ -1,0 +1,11 @@
+- name: Create autoupdater script
+  template: src=autoupdate.py.j2 dest=/usr/local/sbin/autoupdate.py owner=root group=root mode=0500
+ 
+- name: Create autoupdater service
+  template: src=etc_systemd_system_autoupdater.j2 dest=/etc/systemd/system/autoupdater.service owner=root group=root mode=0644
+
+- name: Add autoupdater service to startup
+  service: name={{ item }} enabled=yes
+  with_items:
+    - autoupdater
+

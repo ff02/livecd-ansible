@@ -1,0 +1,43 @@
+- hosts: post
+  connection: chroot
+  sudo: false
+  gather_facts: false
+
+  vars:
+    cdlabel: centos7-updater
+    hostname: centos7-updater
+    livecd_user: centos
+    root_password: rootme
+
+    # Variables below not used directly in playbook. Used by generate_config.py to create basic kickstart file.
+
+    lang: en_US.UTF-8
+    keyboard: us
+    timezone: Europe/Helsinki
+    partition_size: 4096
+
+    repos_list:
+      - { name: 'repo-base'   , baseurl: 'http://ftp.funet.fi/pub/Linux/INSTALL/Centos/7/os/$basearch' }
+      - { name: 'repo-updates', baseurl: 'http://ftp.funet.fi/pub/Linux/INSTALL/Centos/7/updates/$basearch' }
+      - { name: 'repo-epel'   , baseurl: 'https://dl.fedoraproject.org/pub/epel/7/$basearch' }
+
+    # End of variable block used by generate_config.py
+
+  roles:
+    - livecd-pre-common
+    # Add your ansible roles here
+    # - epel-repo
+    - centos-sshd-service
+    - livecd-pxe-common
+    - livecd-post-common
+    - livecd-root-autologin
+    - livecd-autoupdater
+
+
+- hosts: post-nochroot
+  connection: local
+  sudo: false
+  gather_facts: false
+
+  roles:
+    - livecd-isolinux-common

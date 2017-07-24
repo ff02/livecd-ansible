@@ -1,0 +1,19 @@
+[Service]
+
+Type=oneshot
+# Appear as "runnig" after completed
+# RemainAfterExit=yes
+
+ExecStart=/bin/python /usr/local/sbin/autoupdate.py
+# ExecReload=
+KillMode=process
+
+StandardOutput=journal+console
+StandardError=journal+console
+
+# FailureAction=
+SyslogIdentifier=autoupdater
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,39 @@
+- hosts: post
+  connection: chroot
+  sudo: false
+  gather_facts: false
+
+  vars:
+    cdlabel: centos7-minimal
+    hostname: centos7-minimal
+    livecd_user: centos
+    root_password: rootme
+
+    # Variables below not used directly in playbook. Used by generate_config.py to create basic kickstart file.
+
+    lang: en_US.UTF-8
+    keyboard: us
+    timezone: Europe/Helsinki
+    partition_size: 4096
+
+    repos_list:
+      - { name: 'repo-base', baseurl: 'https://mirror.hh.se/centos/7/os/$basearch' }
+      - { name: 'repo-updates', baseurl: 'https://mirror.hh.se/centos/7/updates/$basearch' }
+
+    # End of variable block used by generate_config.py
+
+  roles:
+    - livecd-pre-common
+    - centos-sshd-service
+    - livecd-pxe-common
+    - livecd-post-common
+
+
+- hosts: post-nochroot
+  connection: local
+  sudo: false
+  gather_facts: false
+
+  roles:
+    - livecd-isolinux-common
+

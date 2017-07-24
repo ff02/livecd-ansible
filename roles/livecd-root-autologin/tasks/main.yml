@@ -1,0 +1,10 @@
+- name: Enable root autologin
+  lineinfile: dest=/etc/systemd/system/getty.target.wants/getty@tty1.service regexp=^ExecStart= line="ExecStart=-/sbin/agetty --autologin root --noclear %I" state=present
+
+#- name: Remove the original getty@tty1.service symlink
+#  file: path=/etc/systemd/system/getty.target.wants/getty@tty1.service state=absent
+#
+#- name: Creating getty@tty1.service
+#  template: src=etc_systemd_system_getty@tty1.service.j2 dest=/etc/systemd/system/getty@tty1.service owner=root group=root mode=0755
+
+
